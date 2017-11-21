@@ -39,8 +39,8 @@ import br.eti.kinoshita.testlinkjavaapi.model.CustomField;
 import br.eti.kinoshita.testlinkjavaapi.model.TestPlan;
 import br.eti.kinoshita.testlinkjavaapi.model.TestProject;
 import hudson.EnvVars;
-import hudson.model.BuildListener;
-import hudson.model.StreamBuildListener;
+import hudson.model.TaskListener;
+import hudson.util.StreamTaskListener;
 import hudson.plugins.testlink.result.TestCaseWrapper;
 import junit.framework.TestCase;
 
@@ -50,14 +50,14 @@ import junit.framework.TestCase;
  */
 public class TestTestLinkHelper extends TestCase {
 
-	BuildListener listener;
+	TaskListener listener;
 
 	/**
 	 * Defines the Locale to US
 	 */
 	@Before
 	public void setUp() {
-		listener = new StreamBuildListener(new PrintStream(System.out),
+		listener = new StreamTaskListener(new PrintStream(System.out),
 				Charset.defaultCharset());
 
 		Locale.setDefault(new Locale("en", "US"));

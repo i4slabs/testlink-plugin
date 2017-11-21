@@ -25,8 +25,8 @@ package hudson.plugins.testlink.result;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.BuildListener;
-import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.model.Run;
 import hudson.plugins.testlink.TestLinkSite;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -63,7 +63,7 @@ public class TAPFileNameResultSeeker extends AbstractTAPFileNameResultSeeker {
 	}
 	
 	@Override
-	public void seek(final TestCaseWrapper[] automatedTestCases, AbstractBuild<?, ?> build, Launcher launcher, final BuildListener listener, TestLinkSite testlink) throws ResultSeekerException {
+	public void seek(final TestCaseWrapper[] automatedTestCases, Run<?, ?> build, Launcher launcher, final TaskListener listener, TestLinkSite testlink) throws ResultSeekerException {
 		super.seek(automatedTestCases, build, launcher, listener, testlink);
 	}
 }

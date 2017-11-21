@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import jenkins.tasks.SimpleBuildStep;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

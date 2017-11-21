@@ -24,8 +24,8 @@
 package hudson.plugins.testlink.result;
 
 import hudson.Extension;
-import hudson.model.BuildListener;
-import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.model.Run;
 import hudson.plugins.testlink.TestLinkSite;
 
 import java.util.Map;
@@ -73,7 +73,7 @@ public class TAPFileNameMultiTestPointsResultSeeker extends AbstractTAPFileNameR
 
     @Override
     protected void updateTestCase(Map<String, TestSet> testSets, String key, TestCaseWrapper automatedTestCase,
-            String value, AbstractBuild<?, ?> build, BuildListener listener, TestLinkSite testlink) {
+            String value, Run<?, ?> build, TaskListener listener, TestLinkSite testlink) {
         final TestSet testSet = testSets.get(key);
         int executionNumbers = testSet.getNumberOfTestResults();
         for (Integer i = 1; i <= executionNumbers; i++) {

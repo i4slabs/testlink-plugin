@@ -23,9 +23,8 @@
  */
 package hudson.plugins.testlink;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Run;
+import hudson.model.AbstractProject;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
 
@@ -73,7 +72,7 @@ public class TestLinkProjectAction extends AbstractTestLinkProjectAction {
      * @return the last build action or <code>null</code> if there is no such build action.
      */
     public TestLinkBuildAction getLastBuildAction() {
-        AbstractBuild<?, ?> lastBuild = getLastBuildWithTestLink();
+        Run<?, ?> lastBuild = getLastBuildWithTestLink();
         TestLinkBuildAction action = null;
         if (lastBuild != null) {
             action = lastBuild.getAction(getBuildActionClass());
@@ -87,8 +86,8 @@ public class TestLinkProjectAction extends AbstractTestLinkProjectAction {
      * @return Last build with TestLink in the project or <code>null</code>, if there is no build with TestLink in the
      *         project.
      */
-    private AbstractBuild<?, ?> getLastBuildWithTestLink() {
-        AbstractBuild<?, ?> lastBuild = (AbstractBuild<?, ?>) project.getLastBuild();
+    private Run<?, ?> getLastBuildWithTestLink() {
+        Run<?, ?> lastBuild =  project.getLastBuild();
         while (lastBuild != null && lastBuild.getAction(getBuildActionClass()) == null) {
             lastBuild = lastBuild.getPreviousBuild();
         }
@@ -104,7 +103,7 @@ public class TestLinkProjectAction extends AbstractTestLinkProjectAction {
      * @throws IOException in case of an error
      */
     public void doIndex(final StaplerRequest req, final StaplerResponse res) throws IOException {
-        AbstractBuild<?, ?> lastBuild = getLastBuildWithTestLink();
+        Run<?, ?> lastBuild = getLastBuildWithTestLink();
         if (lastBuild == null) {
             res.sendRedirect2("nodata");
         } else {
@@ -194,7 +193,7 @@ public class TestLinkProjectAction extends AbstractTestLinkProjectAction {
 
     protected void populateDataSetBuilder(DataSetBuilder<String, ChartUtil.NumberOnlyBuildLabel> dataset) {
         for (Run<?, ?> build = getProject().getLastBuild(); build != null; build = build.getPreviousBuild()) {
-            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) build);
+            ChartUtil.NumberOnlyBuildLabel label = new ChartUtil.NumberOnlyBuildLabel(build);
             TestLinkBuildAction action = build.getAction(getBuildActionClass());
             if (action != null) {
                 final TestLinkResult result = action.getResult();

@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.*;
+import hudson.model.*;
+import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -43,15 +46,6 @@ import br.eti.kinoshita.testlinkjavaapi.model.TestCase;
 import br.eti.kinoshita.testlinkjavaapi.model.TestPlan;
 import br.eti.kinoshita.testlinkjavaapi.model.TestProject;
 import br.eti.kinoshita.testlinkjavaapi.util.TestLinkAPIException;
-import hudson.AbortException;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Descriptor;
-import hudson.model.EnvironmentContributingAction;
-import hudson.model.Result;
 import hudson.plugins.testlink.result.ResultSeeker;
 import hudson.plugins.testlink.result.ResultSeekerException;
 import hudson.plugins.testlink.result.TestCaseWrapper;
@@ -60,13 +54,15 @@ import hudson.plugins.testlink.util.TestLinkHelper;
 import hudson.tasks.BuildStep;
 import hudson.tasks.Builder;
 
+import javax.annotation.Nonnull;
+
 /**
  * A builder to add a TestLink build step.
  * 
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 1.0
  */
-public class TestLinkBuilder extends AbstractTestLinkBuilder {
+public class TestLinkBuilder extends AbstractTestLinkBuilder implements SimpleBuildStep {
 
 	private static final Logger LOGGER = Logger.getLogger("hudson.plugins.testlink");
 	
@@ -161,8 +157,8 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 	 * Called when the job is executed.
 	 */
 	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
-			BuildListener listener) throws InterruptedException, IOException {
+	public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath location, @Nonnull Launcher launcher,
+			@Nonnull TaskListener listener) throws InterruptedException, IOException {
 		
 		LOGGER.log(Level.INFO, "TestLink builder started");
 		
@@ -186,14 +182,13 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 		listener.getLogger().println(Messages.TestLinkBuilder_UsedTLURL(testLinkUrl));
 
 		try {
-			final String testProjectName = TestLinkHelper.expandVariable(build.getBuildVariableResolver(),
-					build.getEnvironment(listener), getTestProjectName());
-			final String testPlanName = TestLinkHelper.expandVariable(build.getBuildVariableResolver(),
-					build.getEnvironment(listener), getTestPlanName());
-			final String platformName = TestLinkHelper.expandVariable(build.getBuildVariableResolver(),
-					build.getEnvironment(listener), getPlatformName());
-			final String buildName = TestLinkHelper.expandVariable(build.getBuildVariableResolver(),
-					build.getEnvironment(listener), getBuildName());
+
+			EnvVars env = build.getEnvironment(listener);
+			env.overrideAll(((AbstractBuild) build).getBuildVariables());
+			final String testProjectName = env.expand(getTestProjectName());
+			final String testPlanName = env.expand(getTestPlanName());
+			final String platformName = env.expand(getPlatformName());
+			final String buildName = env.expand(getBuildName());
 			final String buildNotes = Messages.TestLinkBuilder_Build_Notes();
 			if(LOGGER.isLoggable(Level.FINE)) {
 				LOGGER.log(Level.FINE, "TestLink project name: ["+testProjectName+"]");
@@ -208,12 +203,12 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 			if (StringUtils.isNotBlank(platformName) && testLinkSite.getPlatform() == null) 
 			    listener.getLogger().println(Messages.TestLinkBuilder_PlatformNotFound(platformName));
 			
-			final String[] testCaseCustomFieldsNames = TestLinkHelper.createArrayOfCustomFieldsNames(build.getBuildVariableResolver(), build.getEnvironment(listener), this.getCustomFields());
+			final String[] testCaseCustomFieldsNames = TestLinkHelper.createArrayOfCustomFieldsNames(((AbstractBuild) build).getBuildVariableResolver(), build.getEnvironment(listener), this.getCustomFields());
 			// Array of automated test cases
 			TestCase[] testCases = testLinkSite.getAutomatedTestCases(testCaseCustomFieldsNames);
 
 			// Retrieve custom fields in test plan
-			final String[] testPlanCustomFieldsNames = TestLinkHelper.createArrayOfCustomFieldsNames(build.getBuildVariableResolver(), build.getEnvironment(listener), this.getTestPlanCustomFields());
+			final String[] testPlanCustomFieldsNames = TestLinkHelper.createArrayOfCustomFieldsNames(((AbstractBuild) build).getBuildVariableResolver(), build.getEnvironment(listener), this.getTestPlanCustomFields());
 			testPlan = testLinkSite.getTestPlanWithCustomFields(testPlanCustomFieldsNames);
 
 			// Transforms test cases into test case wrappers
@@ -298,7 +293,7 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 		LOGGER.log(Level.INFO, "TestLink builder finished");
 		
 		// end
-		return Boolean.TRUE;
+		//return Boolean.TRUE;
 	}
 
 	/**
@@ -359,8 +354,8 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected void executeSingleBuildSteps(int numberOfTests, TestPlan testPlan, TestLinkSite testLinkSite, AbstractBuild<?, ?> build,
-			Launcher launcher, BuildListener listener) throws IOException,
+	protected void executeSingleBuildSteps(int numberOfTests, TestPlan testPlan, TestLinkSite testLinkSite, Run<?, ?> build,
+			Launcher launcher, TaskListener listener) throws IOException,
 			InterruptedException {
 		if (singleBuildSteps != null) {
 			for (BuildStep b : singleBuildSteps) {
@@ -371,7 +366,7 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
                         testLinkSite.getBuild(), 
                         listener);
                 build.addAction(new EnvironmentContributingAction() {
-                    public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
+                    public void buildEnvironment(@Nonnull Run<?, ?> build, @Nonnull EnvVars env) {
                         env.putAll(iterativeEnvVars);
                     }
                     public String getUrlName() {
@@ -384,7 +379,7 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
                         return null;
                     }
                 });
-				final boolean success = b.perform(build, launcher, listener);
+				final boolean success = b.perform((AbstractBuild<?, ?>) build, launcher, (BuildListener) listener);
 				if (!success) {
 					this.failure = Boolean.TRUE;
 				}
@@ -410,13 +405,13 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 	 */
 	protected void executeIterativeBuildSteps(TestCaseWrapper[] automatedTestCases,
 											  TestPlan testPlan,
-			TestLinkSite testLinkSite, AbstractBuild<?, ?> build,
-			Launcher launcher, BuildListener listener) throws IOException,
+			TestLinkSite testLinkSite, Run<?, ?> build,
+			Launcher launcher, TaskListener listener) throws IOException,
 			InterruptedException {
 
 		if (beforeIteratingAllTestCasesBuildSteps != null) {
 			for (BuildStep b : beforeIteratingAllTestCasesBuildSteps) {
-				final boolean success = b.perform(build, launcher, listener);
+				final boolean success = b.perform((AbstractBuild<?, ?>) build, launcher, (BuildListener) listener);
 				if (!success) {
 					this.failure = Boolean.TRUE;
 				}
@@ -434,7 +429,7 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 									testLinkSite.getBuild(), listener);
 
 					build.addAction(new EnvironmentContributingAction() {
-						public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
+						public void buildEnvironment(Run<?, ?> build, EnvVars env) {
 							env.putAll(iterativeEnvVars);
 						}
 						public String getUrlName() {
@@ -448,7 +443,7 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 						}
 					});
 					for (BuildStep b : iterativeBuildSteps) {
-						final boolean success = b.perform(build, launcher, listener);
+						final boolean success = b.perform((AbstractBuild<?, ?>) build, launcher, (BuildListener) listener);
 						if (!success) {
 							this.failure = Boolean.TRUE;
 						}
@@ -459,7 +454,7 @@ public class TestLinkBuilder extends AbstractTestLinkBuilder {
 
 		if (afterIteratingAllTestCasesBuildSteps != null) {
 			for (BuildStep b : afterIteratingAllTestCasesBuildSteps) {
-				final boolean success = b.perform(build, launcher, listener);
+				final boolean success = b.perform((AbstractBuild<?, ?>) build, launcher, (BuildListener) listener);
 				if (!success) {
 					this.failure = Boolean.TRUE;
 				}

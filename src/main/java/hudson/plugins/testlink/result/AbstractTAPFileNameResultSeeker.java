@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import hudson.model.AbstractBuild;
 import org.jenkinsci.remoting.Role;
 import org.jenkinsci.remoting.RoleChecker;
 import org.jenkinsci.remoting.RoleSensitive;
@@ -30,8 +31,8 @@ import br.eti.kinoshita.testlinkjavaapi.util.TestLinkAPIException;
 import hudson.FilePath;
 import hudson.FilePath.FileCallable;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.Result;
 import hudson.plugins.testlink.TestLinkSite;
 import hudson.remoting.VirtualChannel;
@@ -100,15 +101,15 @@ public abstract class AbstractTAPFileNameResultSeeker extends ResultSeeker {
      * 
      * @see
      * hudson.plugins.testlink.result.ResultSeeker#seekAndUpdate(hudson.plugins.testlink.result.TestCaseWrapper<?>[],
-     * hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener, hudson.plugins.testlink.TestLinkSite,
+     * hudson.model.Run, hudson.Launcher, hudson.model.TaskListener, hudson.plugins.testlink.TestLinkSite,
      * hudson.plugins.testlink.result.Report)
      */
     @Override
-    public void seek(final TestCaseWrapper[] automatedTestCases, AbstractBuild<?, ?> build, Launcher launcher,
-            final BuildListener listener, TestLinkSite testlink) throws ResultSeekerException {
+    public void seek(final TestCaseWrapper[] automatedTestCases, Run<?, ?> build, Launcher launcher,
+            final TaskListener listener, TestLinkSite testlink) throws ResultSeekerException {
 
         try {
-            final Map<String, TestSet> testSets = build.getWorkspace().act(
+            final Map<String, TestSet> testSets = ((AbstractBuild) build).getWorkspace().act(
                     new FilePath.FileCallable<Map<String, TestSet>>() {
                         private static final long serialVersionUID = 1L;
 
@@ -167,7 +168,7 @@ public abstract class AbstractTAPFileNameResultSeeker extends ResultSeeker {
     }
 
     protected void updateTestCase(Map<String, TestSet> testSets, String key, TestCaseWrapper automatedTestCase,
-            String value, AbstractBuild<?, ?> build, BuildListener listener, TestLinkSite testlink) {
+            String value, Run<?, ?> build, TaskListener listener, TestLinkSite testlink) {
         final ExecutionStatus status = this.getExecutionStatus(testSets.get(key));
         automatedTestCase.addCustomFieldAndStatus(value, status);
 
@@ -179,8 +180,8 @@ public abstract class AbstractTAPFileNameResultSeeker extends ResultSeeker {
         this.handleResult(automatedTestCase, build, listener, testlink, status, testSets, key);
     }
 
-    protected void handleResult(TestCaseWrapper automatedTestCase, final AbstractBuild<?, ?> build,
-            BuildListener listener, TestLinkSite testlink, ExecutionStatus status, final Map<String, TestSet> testSets,
+    protected void handleResult(TestCaseWrapper automatedTestCase, final Run<?, ?> build,
+            TaskListener listener, TestLinkSite testlink, ExecutionStatus status, final Map<String, TestSet> testSets,
             final String key) {
         if (automatedTestCase.getExecutionStatus(this.keyCustomField) != ExecutionStatus.NOT_RUN) {
             String platform = this.retrievePlatform(testSets.get(key));
@@ -190,8 +191,8 @@ public abstract class AbstractTAPFileNameResultSeeker extends ResultSeeker {
                 final int executionId = testlink.updateTestCase(automatedTestCase);
 
                 if (executionId > 0 && this.isAttachTAPStream()) {
-                    final String remoteWs = build.getWorkspace().getRemote();
-                    List<Attachment> attachments = build.getWorkspace().act(new FileCallable<List<Attachment>>() {
+                    final String remoteWs = ((AbstractBuild) build).getWorkspace().getRemote();
+                    List<Attachment> attachments = ((AbstractBuild) build).getWorkspace().act(new FileCallable<List<Attachment>>() {
 
                         private static final long serialVersionUID = -5411683541842375558L;
 

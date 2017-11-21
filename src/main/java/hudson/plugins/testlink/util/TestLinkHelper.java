@@ -38,7 +38,7 @@ import br.eti.kinoshita.testlinkjavaapi.model.TestPlan;
 import br.eti.kinoshita.testlinkjavaapi.model.TestProject;
 import hudson.EnvVars;
 import hudson.Util;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import hudson.plugins.testlink.Report;
 import hudson.plugins.testlink.TestLinkBuildAction;
 import hudson.plugins.testlink.result.TestCaseWrapper;
@@ -127,7 +127,7 @@ public final class TestLinkHelper {
 	 * @param testLinkJavaAPIProperties
 	 * @param listener Jenkins Build listener
 	 */
-	public static void setTestLinkJavaAPIProperties(String testLinkJavaAPIProperties, BuildListener listener) {
+	public static void setTestLinkJavaAPIProperties(String testLinkJavaAPIProperties, TaskListener listener) {
 		if (StringUtils.isNotBlank(testLinkJavaAPIProperties)) {
 			final StringTokenizer tokenizer = new StringTokenizer( testLinkJavaAPIProperties, "," );
 			
@@ -146,7 +146,7 @@ public final class TestLinkHelper {
 	 * @param systemProperty System property entry in format <key>=<value>.
 	 * @param listener Jenkins Build listener
 	 */
-	public static void maybeAddSystemProperty(String systemProperty, BuildListener listener) {
+	public static void maybeAddSystemProperty(String systemProperty, TaskListener listener) {
 		final StringTokenizer tokenizer = new StringTokenizer( systemProperty, "=:");
 		if (tokenizer.countTokens() == 2) {
 			final String key 	= tokenizer.nextToken();
@@ -301,7 +301,7 @@ public final class TestLinkHelper {
 	 * @param listener Hudson Build Listener
 	 * @return EnvVars (environment variables)
 	 */
-	public static EnvVars buildTestCaseEnvVars(TestCaseWrapper testCase, TestProject testProject, TestPlan testPlan, Build build, BuildListener listener)	{
+	public static EnvVars buildTestCaseEnvVars(TestCaseWrapper testCase, TestProject testProject, TestPlan testPlan, Build build, TaskListener listener)	{
 		// Build environment variables list
 		Map<String, String> testLinkEnvironmentVariables = TestLinkHelper.createTestLinkEnvironmentVariables( testCase, testProject, testPlan, build );
 		// Merge with build environment variables list
@@ -320,7 +320,7 @@ public final class TestLinkHelper {
      * @param listener Hudson Build Listener
      * @return EnvVars (environment variables)
      */
-    public static EnvVars buildTestCaseEnvVars(int numberOfTests, TestProject testProject, TestPlan testPlan, Build build, BuildListener listener)   {
+    public static EnvVars buildTestCaseEnvVars(int numberOfTests, TestProject testProject, TestPlan testPlan, Build build, TaskListener listener)   {
         // Build environment variables list
         Map<String, String> testLinkEnvironmentVariables = TestLinkHelper.createTestLinkEnvironmentVariables(numberOfTests, testProject, testPlan, build);
         // Merge with build environment variables list

@@ -24,7 +24,7 @@
 package hudson.plugins.testlink;
 
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.plugins.testlink.util.TestLinkHelper;
 
 import java.io.Serializable;
@@ -43,10 +43,10 @@ public class TestLinkBuildAction implements Action, Serializable, StaplerProxy {
     public static final String ICON_FILE_NAME = "/plugin/testlink/icons/testlink-24.png";
     public static final String URL_NAME = "testLinkResult";
 
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> build;
     private TestLinkResult result;
 
-    public TestLinkBuildAction(AbstractBuild<?, ?> build, TestLinkResult result) {
+    public TestLinkBuildAction(Run<?, ?> build, TestLinkResult result) {
         this.build = build;
         this.result = result;
     }
@@ -67,7 +67,7 @@ public class TestLinkBuildAction implements Action, Serializable, StaplerProxy {
         return this.result;
     }
 
-    public AbstractBuild<?, ?> getBuild() {
+    public Run<?, ?> getBuild() {
         return build;
     }
 
@@ -107,7 +107,7 @@ public class TestLinkBuildAction implements Action, Serializable, StaplerProxy {
      */
     public TestLinkBuildAction getPreviousAction() {
         if (this.build != null) {
-            AbstractBuild<?, ?> previousBuild = this.build.getPreviousBuild();
+            Run<?, ?> previousBuild = this.build.getPreviousBuild();
             if (previousBuild != null) {
                 return previousBuild.getAction(TestLinkBuildAction.class);
             }

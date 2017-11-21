@@ -24,9 +24,10 @@
 package hudson.plugins.testlink.result;
 
 import hudson.FilePath.FileCallable;
-import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.model.Result;
+import hudson.model.Run;
 import hudson.plugins.testlink.TestLinkSite;
 import hudson.remoting.VirtualChannel;
 
@@ -86,13 +87,13 @@ public abstract class AbstractTestNGResultSeeker extends ResultSeeker {
 		return markSkippedTestAsBlocked;
 	}
 	
-	protected void handleResult(TestCaseWrapper automatedTestCase, AbstractBuild<?, ?> build, BuildListener listener, TestLinkSite testlink, ExecutionStatus status, final Suite suiteResult) {
+	protected void handleResult(TestCaseWrapper automatedTestCase, Run<?, ?> build, TaskListener listener, TestLinkSite testlink, ExecutionStatus status, final Suite suiteResult) {
 		if(automatedTestCase.getExecutionStatus(this.keyCustomField) != ExecutionStatus.NOT_RUN) {
 			try {
 				final int executionId = testlink.updateTestCase(automatedTestCase);
 				
 				if(executionId > 0 && this.isAttachTestNGXML()) {
-					Attachment attachment = build.getWorkspace().act( new FileCallable<Attachment>() {
+					Attachment attachment = ((AbstractBuild) build).getWorkspace().act(new FileCallable<Attachment>() {
 
 						private static final long serialVersionUID = -5411683541842375558L;
 

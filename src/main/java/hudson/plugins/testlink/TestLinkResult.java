@@ -23,7 +23,7 @@
  */
 package hudson.plugins.testlink;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 
 import java.io.Serializable;
 
@@ -36,14 +36,14 @@ public class TestLinkResult implements Serializable {
     private static final long serialVersionUID = 3355678827881770594L;
 
     private Report report;
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> build;
 
-    public TestLinkResult(Report report, AbstractBuild<?, ?> build) {
+    public TestLinkResult(Report report, Run<?, ?> build) {
         this.report = report;
         this.build = build;
     }
 
-    public AbstractBuild<?, ?> getOwner() {
+    public Run<?, ?> getOwner() {
         return this.build;
     }
 

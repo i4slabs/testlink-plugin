@@ -4,14 +4,14 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.17</version><!-- which version of Jenkins is this plugin built against? -->
+        <version>3.0</version><!-- which version of Jenkins is this plugin built against? -->
     </parent>
 
     <inceptionYear>2010</inceptionYear>
 
 	<artifactId>testlink</artifactId>
 	<name>Jenkins TestLink Plugin</name>
-	<version>3.13-SNAPSHOT</version>
+	<version>3.14-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 	<description>This plug-in integrates Jenkins to TestLink</description>
 
@@ -24,8 +24,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jenkins.version>1.651.3</jenkins.version>
-        <java.level>6</java.level>
+        <jenkins.version>2.91</jenkins.version>
+        <java.level>8</java.level>
     </properties>
 
     <issueManagement>
@@ -161,7 +161,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.jenkins-ci.tools</groupId>
                                         <artifactId>maven-hpi-plugin</artifactId>
-                                        <versionRange>[1.64,)</versionRange>
+                                        <versionRange>[2.1,)</versionRange>
                                         <goals>
                                             <goal>apt-compile</goal>
                                             <goal>insert-test</goal>
@@ -263,7 +263,7 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.8.0</version>
+            <version>1.10.1</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -306,7 +306,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>junit</artifactId>
-            <version>1.11</version>
+            <version>1.22</version>
         </dependency>
     </dependencies>
 

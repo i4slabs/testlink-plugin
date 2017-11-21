@@ -31,6 +31,7 @@ import hudson.plugins.testlink.result.ResultSeeker;
 import hudson.plugins.testlink.util.ExecutionOrderComparator;
 import hudson.tasks.BuildStep;
 import hudson.tasks.Builder;
+import jenkins.tasks.SimpleBuildStep;
 
 /**
  * Contains basic logic for a Builder for TestLink plug-in. This class was created to reduce complexity and reduce the

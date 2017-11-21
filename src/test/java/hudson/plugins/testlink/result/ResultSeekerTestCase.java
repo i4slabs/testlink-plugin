@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 
+import hudson.model.AbstractBuild;
+import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,8 +37,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.testlink.TestLinkSiteFake;
 import hudson.tasks.Builder;
@@ -112,7 +114,7 @@ public abstract class ResultSeekerTestCase {
  * @author Bruno P. Kinoshita - http://www.kinoshita.eti.br
  * @since 3.1
  */
-class ResultSeekerBuilder extends Builder implements Serializable {
+class ResultSeekerBuilder extends Builder implements Serializable, SimpleBuildStep {
 
 	private static final long serialVersionUID = 3497104063426101764L;
 	
@@ -127,18 +129,18 @@ class ResultSeekerBuilder extends Builder implements Serializable {
 	}
 	
 	/* (non-Javadoc)
-	 * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)
+	 * @see hudson.tasks.BuildStepCompatibilityLayer#perform(hudson.model.Run, hudson.Launcher, hudson.model.TaskListener)
 	 */
 	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
-			BuildListener listener) throws InterruptedException,
+	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher,
+			TaskListener listener) throws InterruptedException,
 			IOException {
-		for (FilePath f : build.getWorkspace().list()) {
+		for (FilePath f : ((AbstractBuild) build).getWorkspace().list()) {
 			traverseDirectory(f);
         }
 		
         seeker.seek(tcs, build, launcher, listener, testlink);
-        return (seeker != null);
+        //return (seeker != null);
 	}
 	private static void traverseDirectory(FilePath f) throws InterruptedException, IOException {
 		if (f.isDirectory()) {

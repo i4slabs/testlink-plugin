@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import junit.framework.TestCase;
 
 /**
@@ -46,7 +46,7 @@ public class TestTestLinkResult
 	public void testTestLinkResult()
 	{
 		Report report = new Report(1, null);
-		AbstractBuild<?, ?> build = null;
+		Run<?, ?> build = null;
 		TestLinkResult tlr = new TestLinkResult(report, build);
 		
 		assertNotNull( tlr );

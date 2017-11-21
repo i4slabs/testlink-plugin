@@ -25,8 +25,9 @@ package hudson.plugins.testlink.result;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.model.Run;
 import hudson.plugins.testlink.TestLinkSite;
 import hudson.plugins.testlink.util.Messages;
 import hudson.tasks.junit.JUnitParser;
@@ -79,14 +80,14 @@ public class JUnitMethodNameResultSeeker extends AbstractJUnitResultSeeker {
 	}
 
 	/* (non-Javadoc)
-	 * @see hudson.plugins.testlink.result.ResultSeeker#seekAndUpdate(hudson.plugins.testlink.result.TestCaseWrapper<?>[], hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener, hudson.plugins.testlink.TestLinkSite, hudson.plugins.testlink.result.Report)
+	 * @see hudson.plugins.testlink.result.ResultSeeker#seekAndUpdate(hudson.plugins.testlink.result.TestCaseWrapper<?>[], hudson.model.Run, hudson.Launcher, hudson.model.TaskListener, hudson.plugins.testlink.TestLinkSite, hudson.plugins.testlink.result.Report)
 	 */
 	@Override
-	public void seek(TestCaseWrapper[] automatedTestCases, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, TestLinkSite testlink) throws ResultSeekerException {
+	public void seek(TestCaseWrapper[] automatedTestCases, Run<?, ?> build, Launcher launcher, TaskListener listener, TestLinkSite testlink) throws ResultSeekerException {
 		listener.getLogger().println( Messages.Results_JUnit_LookingForTestMethods() ); // i18n
 		try {
-			final JUnitParser parser = new JUnitParser(false);
-			final TestResult testResult = parser.parse(this.includePattern, build, launcher, listener);
+			final JUnitParser parser = new JUnitParser(false, false);
+			final TestResult testResult = parser.parseResult(this.includePattern, build, null, ((AbstractBuild) build).getWorkspace(), launcher, listener);
 			
 			for(final SuiteResult suiteResult : testResult.getSuites()) {
 				for(CaseResult caseResult : suiteResult.getCases()) {
